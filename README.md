@@ -1,5 +1,7 @@
 # Squid4 with SSL proxying
 
+From https://github.com/wrouesnel/docker-squid4
+
 This dockerfile builds a Squid 4 instance and includes all the necessary
 tooling to run it as a MITM (man-in-the-middle) SSL proxy.
 
