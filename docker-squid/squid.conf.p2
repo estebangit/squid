@@ -7,6 +7,11 @@ cache_store_log stdio:/dev/stdout
 cache_log /dev/stderr
 netdb_filename stdio:/var/cache/squid4/netdb.state
 
+{% if MITM_PROXY|default:"" == "yes" %}
+acl intermediate_fetching transaction_initiator certificate-fetching
+http_access allow intermediate_fetching
+{% endif %}
+
 # Visible hostname to allow multi-squid
 visible_hostname {{VISIBLE_HOSTNAME|default:"docker-squid4"}}
 
@@ -25,12 +30,20 @@ tls_outgoing_options capath=/etc/ssl/certs \
 http_port {{HTTP_PORT}} {% if MITM_PROXY|default:"" == "yes" %} ssl-bump \
     generate-host-certificates=on \
     dynamic_cert_mem_cache_size=4MB \
-    cert=/etc/squid4/ssl_cert/mitm.crt \
-    key=/etc/squid4/ssl_cert/mitm.pem
+    tls-cert=/etc/squid4/ssl_cert/mitm.crt \
+    tls-key=/etc/squid4/ssl_cert/mitm.pem
+{% endif %}
+
+{% if MITM_PROXY_PARENT|default:"" != "" %}
+cache_peer {{MITM_PROXY_PARENT}} parent {{MITM_PROXY_PARENT_PORT}} 0 proxy-only no-query no-digest no-netdb-exchange
+never_direct allow all
 {% endif %}
 
 {% if MITM_PROXY|default:"" == "yes" %}
-ssl_bump bump all
+sslcrtd_program /usr/libexec/security_file_certgen -s /var/spool/squid4/ssl_db -M 4MB
+sslproxy_cert_error allow all
+ssl_bump stare all
+#ssl_bump bump all
 {% endif %}
 
 {% if ICP_PORT|default:"" != "" %}

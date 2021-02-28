@@ -1,0 +1,5 @@
+squid_mitm/
+squid_simple/
+*.cer
+*.crt
+*.key

@@ -16,6 +16,7 @@ chown -R proxy: /var/cache/squid4
 chmod -R 750 /var/cache/squid4
 
 if [ ! -z $MITM_PROXY ]; then
+    echo "MITM enabled"
     if [ ! -z $MITM_KEY ]; then
         echo "Copying $MITM_KEY as MITM key..."
         cp $MITM_KEY /etc/squid4/ssl_cert/mitm.pem
@@ -29,20 +30,33 @@ if [ ! -z $MITM_PROXY ]; then
     fi
 
     if [ -z $MITM_CERT ] || [ -z $MITM_KEY ]; then
-        echo "Must specify $MITM_CERT AND $MITM_KEY." 1>&2
+        echo "Must specify MITM_CERT:$MITM_CERT AND MITM_KEY:$MITM_KEY." 1>&2
         exit 1
     fi
+else
+    echo "MITM disabled"
 fi
 
 chown proxy: /dev/stdout
 chown proxy: /dev/stderr
 
-# Initialize the certificates database
-/usr/libexec/security_file_certgen -c -s /var/spool/squid4/ssl_db -M 4MB
-chown -R proxy: /var/spool/squid4/ssl_db
+if [ ! -z $MITM_PROXY ]; then
+    echo 'Init ssl DB'
+    # Initialize the certificates database
+    # /usr/libexec/security_file_certgen -c -s /var/spool/squid4/ssl_db -M 4MB
+    # chown -R proxy: /var/spool/squid4/ssl_db
 
-#ssl_crtd -c -s
-#ssl_db
+    /usr/libexec/security_file_certgen -c -s /var/spool/squid4/ssl_db -M 4MB
+    chown -R proxy: /var/spool/squid4/ssl_db
+
+    # mkdir -p /var/lib/squid
+    # rm -rf /var/lib/squid/ssl_db
+    # /usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 20MB
+    # chown -R proxy:proxy /var/lib/squid
+
+    #ssl_crtd -c -s
+    #ssl_db
+fi
 
 # Set the configuration
 if [ "$CONFIG_DISABLE" != "yes" ]; then
@@ -107,6 +121,7 @@ if [ "$PROXYCHAIN" = "yes" ] && [ "$CONFIG_DISABLE" != "yes" ]; then
         echo "$line" >> /etc/proxychains.conf
     done
 else
+    echo "Proxychain disabled"
     echo "/etc/proxychains.conf : CONFIGURATION TEMPLATING IS DISABLED"
 fi
 

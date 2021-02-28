@@ -1,0 +1,37 @@
+[ ca ]
+default_ca						= CA_default
+ 
+[ CA_default ]
+default_days					= 365
+default_md						= sha256
+
+[ req ]
+days                   = 3652
+default_bits           = 2048
+default_keyfile        = ca.key
+distinguished_name     = req_distinguished_name
+x509_extensions        = v3_ca
+prompt                 = no
+string_mask            = utf8only
+
+[ req_distinguished_name ]
+countryName                    = CH
+localityName                   = Geneva
+organizationName               = Esteban
+organizationalUnitName         = Test
+commonName                     = kubernetes.docker.internal
+emailAddress                   = esteban@esteban.com
+
+[ signing_policy ]
+countryName     				= optional
+stateOrProvinceName 			= optional
+localityName        			= optional
+organizationName    			= optional
+organizationalUnitName  		= optional
+commonName      				= supplied
+emailAddress        			= optional
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true
