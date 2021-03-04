@@ -19,20 +19,20 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get build-dep -y squid && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y wget tar xz-utils libssl-dev nano
 
-ARG SQUID_VERSION=4.14
+ARG SQUID_VERSION=5.0.5
 
 # TODO: verify the squid download with the signing key
 RUN mkdir /src \
     && cd /src \
-    && wget http://www.squid-cache.org/Versions/v4/squid-$SQUID_VERSION.tar.xz \
+    && wget http://www.squid-cache.org/Versions/v5/squid-$SQUID_VERSION.tar.xz \
     && mkdir squid \
     && tar -C squid --strip-components=1 -xvf squid-$SQUID_VERSION.tar.xz
-    
+
 RUN cd /src/squid && \
     ./configure \
         --prefix=/usr \
-        --datadir=/usr/share/squid4 \
-		--sysconfdir=/etc/squid4 \
+        --datadir=/usr/share/squid5 \
+		--sysconfdir=/etc/squid5 \
 		--localstatedir=/var \
 		--mandir=/usr/share/man \
 		--enable-inline \
@@ -56,17 +56,17 @@ RUN cd /src/squid && \
 		--enable-zph-qos \
 		--with-openssl \
 		--enable-ssl \
-		--enable-ssl-crtd \ 
+		--enable-ssl-crtd \
 		--disable-translation \
-		--with-swapdir=/var/spool/squid4 \
-		--with-logdir=/var/log/squid4 \
-		--with-pidfile=/var/run/squid4.pid \
+		--with-swapdir=/var/spool/squid5 \
+		--with-logdir=/var/log/squid5 \
+		--with-pidfile=/var/run/squid5.pid \
 		--with-filedescriptors=65536 \
 		--with-large-files \
 		--with-default-user=proxy \
         --disable-arch-native \
         --disable-ipv6
-		
+
 ARG CONCURRENCY=1
 
 RUN cd /src/squid && \
@@ -78,23 +78,23 @@ RUN wget -O /usr/local/bin/p2 \
     https://github.com/wrouesnel/p2cli/releases/download/r5/p2 && \
     chmod +x /usr/local/bin/p2
 
-# Clone and build proxychains-ng for SSL upstream proxying
-ARG PROXYCHAINS_COMMITTISH=e895fb713ac1c1e92ee0795645f220573181c6fb
+# # Clone and build proxychains-ng for SSL upstream proxying
+# ARG PROXYCHAINS_COMMITTISH=e895fb713ac1c1e92ee0795645f220573181c6fb
 
-RUN apt-get install -y git
+# RUN apt-get install -y git
 
-RUN git clone https://github.com/rofl0r/proxychains-ng.git /src/proxychains-ng && \
-    cd /src/proxychains-ng && \
-    git checkout $PROXYCHAINS_COMMITTISH && \
-    ./configure --prefix=/usr --sysconfdir=/etc && \
-    make -j$CONCURRENCY && make install
+# RUN git clone https://github.com/rofl0r/proxychains-ng.git /src/proxychains-ng && \
+#     cd /src/proxychains-ng && \
+#     git checkout $PROXYCHAINS_COMMITTISH && \
+#     ./configure --prefix=/usr --sysconfdir=/etc && \
+#     make -j$CONCURRENCY && make install
 
-ARG URL_DOH=https://github.com/wrouesnel/dns-over-https-proxy/releases/download/v0.0.2/dns-over-https-proxy_v0.0.2_linux-amd64.tar.gz
+# ARG URL_DOH=https://github.com/wrouesnel/dns-over-https-proxy/releases/download/v0.0.2/dns-over-https-proxy_v0.0.2_linux-amd64.tar.gz
 
-RUN wget -O /tmp/doh.tgz \
-    $URL_DOH && \
-    tar -xvvf /tmp/doh.tgz --strip-components=1 -C /usr/local/bin/ && \
-    chmod +x /usr/local/bin/dns-over-https-proxy
+# RUN wget -O /tmp/doh.tgz \
+#     $URL_DOH && \
+#     tar -xvvf /tmp/doh.tgz --strip-components=1 -C /usr/local/bin/ && \
+#     chmod +x /usr/local/bin/dns-over-https-proxy
 
 COPY squid.conf.p2 /squid.conf.p2
 COPY squid.bsh /squid.bsh
@@ -108,7 +108,7 @@ ENV HTTP_PORT=3128 \
     MITM_PROXY_PARENT_PORT= \
     MITM_CERT= \
     MITM_KEY= \
-    VISIBLE_HOSTNAME=docker-squid4 \
+    VISIBLE_HOSTNAME=docker-squid5 \
     MAX_CACHE_SIZE=40000 \
     MAX_OBJECT_SIZE="1536 MB" \
     MEM_CACHE_SIZE="128 MB" \

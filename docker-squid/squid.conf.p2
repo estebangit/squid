@@ -5,45 +5,49 @@ logfile_rotate 0
 access_log stdio:/dev/stdout combined
 cache_store_log stdio:/dev/stdout
 cache_log /dev/stderr
-netdb_filename stdio:/var/cache/squid4/netdb.state
+netdb_filename stdio:/var/cache/squid5/netdb.state
 
 {% if MITM_PROXY|default:"" == "yes" %}
-acl intermediate_fetching transaction_initiator certificate-fetching
-http_access allow intermediate_fetching
+#acl intermediate_fetching transaction_initiator certificate-fetching
+#http_access allow intermediate_fetching
 {% endif %}
 
 # Visible hostname to allow multi-squid
-visible_hostname {{VISIBLE_HOSTNAME|default:"docker-squid4"}}
+visible_hostname {{VISIBLE_HOSTNAME|default:"docker-squid5"}}
 
 {% if DISABLE_CACHE|default:"" != "yes" %}
 # Cache directory is fixed since we'll bind mount.
-cache_dir aufs /var/cache/squid4 {{MAX_CACHE_SIZE|default:"40000"}} 16 256
+cache_dir aufs /var/cache/squid5 {{MAX_CACHE_SIZE|default:"40000"}} 16 256
 {% endif %}
 
 maximum_object_size {{MAX_OBJECT_SIZE|default:"1536 MB"}}
 cache_mem {{MEM_CACHE_SIZE|default:"128 MB"}}
 
-tls_outgoing_options capath=/etc/ssl/certs \
-    options={{TLS_OPTIONS|default:"NO_SSLv3,NO_TLSv1"}} \
-    cipher=ALL:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+{% if MITM_PROXY|default:"" == "yes" %}
+#tls_outgoing_options capath=/etc/ssl/certs \
+#    options={{TLS_OPTIONS|default:"NO_SSLv3,NO_TLSv1"}} \
+#    cipher=ALL:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+{% endif %}
 
 http_port {{HTTP_PORT}} {% if MITM_PROXY|default:"" == "yes" %} ssl-bump \
     generate-host-certificates=on \
     dynamic_cert_mem_cache_size=4MB \
-    tls-cert=/etc/squid4/ssl_cert/mitm.crt \
-    tls-key=/etc/squid4/ssl_cert/mitm.pem
+    tls-cert=/etc/squid5/ssl_cert/mitm.crt \
+    tls-key=/etc/squid5/ssl_cert/mitm.pem
 {% endif %}
 
 {% if MITM_PROXY_PARENT|default:"" != "" %}
-cache_peer {{MITM_PROXY_PARENT}} parent {{MITM_PROXY_PARENT_PORT}} 0 proxy-only no-query no-digest no-netdb-exchange
-never_direct allow all
+#cache_peer {{MITM_PROXY_PARENT}} parent {{MITM_PROXY_PARENT_PORT}} 0 proxy-only no-query no-digest no-netdb-exchange
+#never_direct allow all
 {% endif %}
 
 {% if MITM_PROXY|default:"" == "yes" %}
-sslcrtd_program /usr/libexec/security_file_certgen -s /var/spool/squid4/ssl_db -M 4MB
+sslcrtd_program /usr/libexec/security_file_certgen -s /var/spool/squid5/ssl_db -M 4MB
 sslproxy_cert_error allow all
-ssl_bump stare all
-#ssl_bump bump all
+#ssl_bump stare all
+#acl step1 at_step SslBump1
+#ssl_bump peek step1
+ssl_bump bump all
 {% endif %}
 
 {% if ICP_PORT|default:"" != "" %}
@@ -57,3 +61,5 @@ htcp_access allow all
 {% endif %}
 
 http_access allow all
+
+pinger_enable off

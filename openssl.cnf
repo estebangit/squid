@@ -1,6 +1,6 @@
 [ ca ]
 default_ca						= CA_default
- 
+
 [ CA_default ]
 default_days					= 365
 default_md						= sha256

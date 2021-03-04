@@ -7,9 +7,11 @@ echo '**********************'
 
 # Start Squid4 in MITM mode
 echo 'Prepare env ...'
-root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_mitm'
+#root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_mitm'
+root_path='/Users/ebarajas/projects/squid/squid_mitm/squid_mitm'
 cert_name='local_mitm'
-
+host_name='kubernetes.docker.internal'
+rm -rf ${root_path}
 mkdir -p "${root_path}/tmp"
 mkdir -p "${root_path}/cache"
 mkdir -p "${root_path}/etc/ssl/certs"
@@ -17,11 +19,11 @@ mkdir -p "${root_path}/etc/ssl/private"
 
 # Generate certificat
 echo 'Generate certificats ...'
-openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -outform PEM -verbose \
+openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -extensions v3_ca -outform PEM -verbose \
     -keyout ${root_path}/etc/ssl/private/${cert_name}.key \
     -out ${root_path}/etc/ssl/certs/${cert_name}.crt \
     -config ./openssl.cnf
-#    -subj "/C=CH/ST=Geneva/L=Geneva/O=Esteban/OU=test/CN=kubernetes.docker.internal"
+# #    -subj "/C=CH/ST=Geneva/L=Geneva/O=Esteban/OU=test/CN=${host_name}"
 
 echo ''
 echo 'Check key'
@@ -49,24 +51,23 @@ openssl x509 -in ${root_path}/etc/ssl/certs/${cert_name}.crt -text -noout
 # cp ca.key "${root_path}/etc/ssl/private/${cert_name}.key"
 # cp ca.cer "${root_path}/etc/ssl/certs/${cert_name}.crt"
 
-cp www-google-com-chain.pem "${root_path}/etc/ssl/certs/google-chain.pem"
-cp www-google-com.pem "${root_path}/etc/ssl/certs/google.crt"
+# cp www-google-com-chain.pem "${root_path}/etc/ssl/certs/google-chain.pem"
+# cp www-google-com.pem "${root_path}/etc/ssl/certs/google.crt"
 
 echo 'Start docker ...'
 
 docker run -t --rm --name squid_mitm -p 3128:3128 \
-    --volume="${root_path}/cache":/var/cache/squid4 \
+    --volume="${root_path}/cache":/var/cache/squid5 \
     --volume="${root_path}/etc/ssl/certs":/etc/ssl/certs:ro \
     --volume="${root_path}/etc/ssl/private/${cert_name}.key":/${cert_name}.key:ro \
     --volume="${root_path}/etc/ssl/certs/${cert_name}.crt":/${cert_name}.crt:ro \
     -e "MITM_CERT=/${cert_name}.crt" \
     -e "MITM_KEY=/${cert_name}.key" \
     -e "MITM_PROXY=yes" \
-    -e "MITM_PROXY_PARENT=kubernetes.docker.internal" \
+    -e "MITM_PROXY_PARENT=${host_name}" \
     -e "MITM_PROXY_PARENT_PORT=8080" \
     -e "DISABLE_CACHE=yes" \
-    -e "PROXYCHAIN=no" \
-    -e "PROXYCHAIN_PROXY1=http 127.0.0.1 8080" \
+    -e "VISIBLE_HOSTNAME=${host_name}" \
     squid_mitm:latest
 
 echo 'Done'
