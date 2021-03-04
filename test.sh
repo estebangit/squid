@@ -26,7 +26,7 @@ echo 'Client'
 curl -k -v --proxy ${host_name}:3128 -o /dev/null \
     --proxy-capath "${root_path}/etc/ssl/certs" \
     --proxy-cacert "${root_path}/etc/ssl/certs/${cert_name}.crt" \
-    GET https://mcsvc.dynatrace.com
+    GET https://mcsvc.dynatrace.com/
 
 # curl -k -v --proxy ${host_name}:3128 -o /dev/null \
 #     --proxy-capath "${root_path}/etc/ssl/certs" \

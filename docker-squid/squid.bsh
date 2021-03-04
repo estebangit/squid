@@ -92,7 +92,9 @@ if [ ! -e /etc/squid5/squid.conf ]; then
     echo "ERROR: /etc/squid5/squid.conf does not exist. Squid will not work."
     exit 1
 fi
+echo '----------deb squid.conf-------------'
 cat /etc/squid5/squid.conf
+echo '----------fin squid.conf-------------'
 
 # If proxychains is requested and config templating is active
 if [ "$PROXYCHAIN" = "yes" ] && [ "$CONFIG_DISABLE" != "yes" ]; then

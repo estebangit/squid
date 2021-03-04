@@ -8,8 +8,8 @@ cache_log /dev/stderr
 netdb_filename stdio:/var/cache/squid5/netdb.state
 
 {% if MITM_PROXY|default:"" == "yes" %}
-#acl intermediate_fetching transaction_initiator certificate-fetching
-#http_access allow intermediate_fetching
+acl intermediate_fetching transaction_initiator certificate-fetching
+http_access allow intermediate_fetching
 {% endif %}
 
 # Visible hostname to allow multi-squid
@@ -24,9 +24,9 @@ maximum_object_size {{MAX_OBJECT_SIZE|default:"1536 MB"}}
 cache_mem {{MEM_CACHE_SIZE|default:"128 MB"}}
 
 {% if MITM_PROXY|default:"" == "yes" %}
-#tls_outgoing_options capath=/etc/ssl/certs \
-#    options={{TLS_OPTIONS|default:"NO_SSLv3,NO_TLSv1"}} \
-#    cipher=ALL:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+tls_outgoing_options capath=/etc/ssl/certs \
+    options={{TLS_OPTIONS|default:"NO_SSLv3,NO_TLSv1"}} \
+    cipher=ALL:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
 {% endif %}
 
 http_port {{HTTP_PORT}} {% if MITM_PROXY|default:"" == "yes" %} ssl-bump \
@@ -37,8 +37,8 @@ http_port {{HTTP_PORT}} {% if MITM_PROXY|default:"" == "yes" %} ssl-bump \
 {% endif %}
 
 {% if MITM_PROXY_PARENT|default:"" != "" %}
-#cache_peer {{MITM_PROXY_PARENT}} parent {{MITM_PROXY_PARENT_PORT}} 0 proxy-only no-query no-digest no-netdb-exchange
-#never_direct allow all
+cache_peer {{MITM_PROXY_PARENT}} parent {{MITM_PROXY_PARENT_PORT}} 0 proxy-only no-query no-digest no-netdb-exchange
+never_direct allow all
 {% endif %}
 
 {% if MITM_PROXY|default:"" == "yes" %}
