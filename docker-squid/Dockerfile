@@ -78,23 +78,7 @@ RUN wget -O /usr/local/bin/p2 \
     https://github.com/wrouesnel/p2cli/releases/download/r5/p2 && \
     chmod +x /usr/local/bin/p2
 
-# # Clone and build proxychains-ng for SSL upstream proxying
-# ARG PROXYCHAINS_COMMITTISH=e895fb713ac1c1e92ee0795645f220573181c6fb
-
 # RUN apt-get install -y git
-
-# RUN git clone https://github.com/rofl0r/proxychains-ng.git /src/proxychains-ng && \
-#     cd /src/proxychains-ng && \
-#     git checkout $PROXYCHAINS_COMMITTISH && \
-#     ./configure --prefix=/usr --sysconfdir=/etc && \
-#     make -j$CONCURRENCY && make install
-
-# ARG URL_DOH=https://github.com/wrouesnel/dns-over-https-proxy/releases/download/v0.0.2/dns-over-https-proxy_v0.0.2_linux-amd64.tar.gz
-
-# RUN wget -O /tmp/doh.tgz \
-#     $URL_DOH && \
-#     tar -xvvf /tmp/doh.tgz --strip-components=1 -C /usr/local/bin/ && \
-#     chmod +x /usr/local/bin/dns-over-https-proxy
 
 COPY squid.conf.p2 /squid.conf.p2
 COPY squid.bsh /squid.bsh
@@ -111,13 +95,7 @@ ENV HTTP_PORT=3128 \
     VISIBLE_HOSTNAME=docker-squid5 \
     MAX_CACHE_SIZE=40000 \
     MAX_OBJECT_SIZE="1536 MB" \
-    MEM_CACHE_SIZE="128 MB" \
-    DNS_OVER_HTTPS_LISTEN_ADDR="127.0.0.153:53" \
-    DNS_OVER_HTTPS_SERVER="https://dns.google.com/resolve" \
-    DNS_OVER_HTTPS_NO_FALLTHROUGH="" \
-    DNS_OVER_HTTPS_FALLTHROUGH_STATUSES=NXDOMAIN \
-    DNS_OVER_HTTPS_PREFIX_SERVER= \
-    DNS_OVER_HTTPS_SUFFIX_SERVER=
+    MEM_CACHE_SIZE="128 MB"
 
 EXPOSE 3128
 
