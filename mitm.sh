@@ -5,10 +5,9 @@ echo '**********************'
 echo '***** MITM Mode ******'
 echo '**********************'
 
-# Start Squid4 in MITM mode
+# Start Squid5 in MITM mode
 echo 'Prepare env ...'
-#root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_mitm'
-root_path='/Users/ebarajas/projects/squid/squid_mitm/squid_mitm'
+root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_mitm'
 cert_name='local_mitm'
 host_name='kubernetes.docker.internal'
 rm -rf ${root_path}
@@ -46,13 +45,6 @@ openssl x509 -in ${root_path}/etc/ssl/certs/${cert_name}.crt -text -noout
 # # Check
 # openssl rsa -in "${root_path}/tmp/example.com.key" -check
 # openssl x509 -in "${root_path}/tmp/example.com.crt" -text -noout
-
-#echo 'Copy certificats ...'
-# cp ca.key "${root_path}/etc/ssl/private/${cert_name}.key"
-# cp ca.cer "${root_path}/etc/ssl/certs/${cert_name}.crt"
-
-# cp www-google-com-chain.pem "${root_path}/etc/ssl/certs/google-chain.pem"
-# cp www-google-com.pem "${root_path}/etc/ssl/certs/google.crt"
 
 echo 'Start docker ...'
 

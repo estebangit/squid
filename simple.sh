@@ -5,10 +5,9 @@ echo '**********************'
 echo '**** Simple Mode *****'
 echo '**********************'
 
-# Start Squid4 in simple mode
+# Start Squid5 in simple mode
 echo 'Prepare env ...'
-#root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_simple'
-root_path='/Users/ebarajas/projects/squid/squid_mitm/squid_simple'
+root_path='/Users/esteban/Projets/squid2/docker-squid4/squid_simple'
 rm -rf ${root_path}
 mkdir -p "${root_path}/cache"
 
