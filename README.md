@@ -65,6 +65,11 @@ variables:
    are safe defaults, but if you're in a really broken environment might not be
    usable.
 
+# Add trusted certificate
+```
+docker build --build-arg TRUST_CERT=xxxxxxxxxxxxxxxx
+```
+
 # Example Usage
 The following command line will get you up and running quickly. It presumes
 you've generated a suitable CA certificate and are intending to use the proxy
